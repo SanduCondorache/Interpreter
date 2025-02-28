@@ -1,19 +1,13 @@
 package object
 
-func NewEnclosedEnvironment(outer *Environment) *Environment {
-	env := NewEnvironment()
-	env.outer = outer
-	return env
+type Environment struct {
+	store map[string]Object
+	outer *Environment
 }
 
 func NewEnvironment() *Environment {
 	s := make(map[string]Object)
 	return &Environment{store: s, outer: nil}
-}
-
-type Environment struct {
-	store map[string]Object
-	outer *Environment
 }
 
 func (e *Environment) Get(name string) (Object, bool) {
@@ -27,4 +21,10 @@ func (e *Environment) Get(name string) (Object, bool) {
 func (e *Environment) Set(name string, val Object) Object {
 	e.store[name] = val
 	return val
+}
+
+func NewEnclosedEnvironment(outer *Environment) *Environment {
+	env := NewEnvironment()
+	env.outer = outer
+	return env
 }
