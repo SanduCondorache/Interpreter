@@ -13,6 +13,8 @@ test-parser:
 test-lexer:
 	@go test ./internals/lexer
 test-object:
-	@go test ./internals/objects
+	@go test ./internals/object
 test-evaluator:
 	@go test ./evaluator
+test:
+	@go test -v ./...
