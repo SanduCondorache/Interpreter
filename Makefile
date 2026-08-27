@@ -17,4 +17,4 @@ test-object:
 test-evaluator:
 	@go test ./evaluator
 test:
-	@go test -v ./...
+	@gotestsum
