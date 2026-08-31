@@ -7,6 +7,7 @@ import (
 
 	"github.com/SanduCondorache/Interpreter/internals/compiler"
 	"github.com/SanduCondorache/Interpreter/internals/lexer"
+	"github.com/SanduCondorache/Interpreter/internals/object"
 	"github.com/SanduCondorache/Interpreter/internals/vm"
 	"github.com/SanduCondorache/Interpreter/parser"
 )
@@ -15,6 +16,11 @@ const PROMT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+
+	constants := []object.Object{}
+	globals := make([]object.Object, vm.GlobalsSize)
+	symbolTable := compiler.NewSymbolTable()
+
 	for {
 		fmt.Printf(PROMT)
 		scanned := scanner.Scan()
@@ -31,7 +37,7 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		comp := compiler.New()
+		comp := compiler.NewWithState(symbolTable, constants)
 		err := comp.Compile(program)
 
 		if err != nil {
@@ -39,7 +45,10 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		machine := vm.New(comp.ByteCode())
+		code := comp.ByteCode()
+		constants = code.Constants
+
+		machine := vm.NewWithGlobalsStore(code, globals)
 		err = machine.Run()
 
 		if err != nil {
