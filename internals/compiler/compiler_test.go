@@ -167,6 +167,17 @@ func testConstants(_ *testing.T, expected []any, actual []object.Object) error {
 			if err != nil {
 				return fmt.Errorf("constant %d - testStringObject failed: %s", i, err)
 			}
+		case []code.Instructions:
+			fn, ok := actual[i].(*object.CompiledFunction)
+
+			if !ok {
+				return fmt.Errorf("constant %d - not a function: %T", i, actual[i])
+			}
+
+			err := testInstructions(constant, fn.Instructions)
+			if err != nil {
+				return fmt.Errorf("constant %d - testInstructions failed: %s", i, err)
+			}
 		}
 	}
 
@@ -536,6 +547,29 @@ func TestIndexExpressions(t *testing.T) {
 				code.Make(code.OpConstant, 3),
 				code.Make(code.OpSub),
 				code.Make(code.OpIndex),
+				code.Make(code.OpPop),
+			},
+		},
+	}
+	runCompilerTest(t, tests)
+}
+
+func TestFunctions(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `fn() { return 5 + 10 }`,
+			expectedConstants: []any{
+				5,
+				10,
+				[]code.Instructions{
+					code.Make(code.OpConstant, 0),
+					code.Make(code.OpConstant, 1),
+					code.Make(code.OpAdd),
+					code.Make(code.OpReturnValue),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 2),
 				code.Make(code.OpPop),
 			},
 		},

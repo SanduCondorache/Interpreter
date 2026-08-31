@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/SanduCondorache/Interpreter/ast"
+	"github.com/SanduCondorache/Interpreter/internals/code"
 )
 
 type ObjectType string
@@ -24,10 +25,11 @@ const (
 
 	STRING_OBJ = "STRING"
 	ARRAY_OBJ  = "ARRAY"
+	HASH_OBJ   = "HASH"
 
 	BUILTIN_OBJ = "BUILTIN"
 
-	HASH_OBJ = "HASH"
+	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION_OBJ"
 )
 
 type Object interface {
@@ -201,4 +203,16 @@ func (h *Hash) Inspect() string {
 
 type Hashable interface {
 	HashKey() HashKey
+}
+
+type CompiledFunction struct {
+	Instructions code.Instructions
+}
+
+func (cf *CompiledFunction) Type() ObjectType {
+	return COMPILED_FUNCTION_OBJ
+}
+
+func (cf *CompiledFunction) Inspect() string {
+	return fmt.Sprintf("CompiledFunction[%p]", cf)
 }
