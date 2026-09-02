@@ -665,3 +665,45 @@ func TestCompilerScopes(t *testing.T) {
 		t.Errorf("previousInstruction.Opcode wrong. got=%d, want=%d", previous.OpCode, code.OpMul)
 	}
 }
+
+func TestFunctionCalls(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `fn() { 24 }();`,
+			expectedConstants: []any{
+				24,
+				[]code.Instructions{
+					code.Make(code.OpConstant, 0), // The literal "24"
+					code.Make(code.OpReturnValue),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 1), // The compiled function
+				code.Make(code.OpCall),
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input: `
+let noArg = fn() { 24 };
+noArg();
+`,
+			expectedConstants: []any{
+				24,
+				[]code.Instructions{
+					code.Make(code.OpConstant, 0), // The literal "24"
+					code.Make(code.OpReturnValue),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 1), // The compiled function
+				code.Make(code.OpSetGlobal, 0),
+				code.Make(code.OpGetGlobal, 0),
+				code.Make(code.OpCall),
+				code.Make(code.OpPop),
+			},
+		},
+	}
+
+	runCompilerTest(t, tests)
+}
